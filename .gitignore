@@ -23,5 +23,6 @@ frontend/.flutter-plugins
 frontend/.flutter-plugins-dependencies
 frontend/.metadata
 frontend/build/
+frontend/android/build/
 frontend/.packages
 frontend/coverage/
