@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "320744151591",
+    "project_id": "matcha-recipes",
+    "storage_bucket": "matcha-recipes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320744151591:android:5ef128b141259572ad4c02",
+        "android_client_info": {
+          "package_name": "com.vimeanlav.matcharecipes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDHczC6Jb3uzuuQmIeaIuUU1UtGe79ClM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
