@@ -2,6 +2,11 @@
 cmake_minimum_required(VERSION 3.14)
 project(frontend LANGUAGES CXX)
 
+# CMake 4.x removed compatibility with CMake < 3.5. Some third-party
+# dependencies (e.g. Firebase C++ SDK) still declare older minimum versions.
+# Setting this allows configuration to proceed under newer CMake releases.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "Minimum CMake policy version" FORCE)
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "frontend")
