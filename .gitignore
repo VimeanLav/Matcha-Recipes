@@ -26,3 +26,5 @@ frontend/build/
 frontend/android/build/
 frontend/.packages
 frontend/coverage/
+frontend/.env
+frontend/.env.*

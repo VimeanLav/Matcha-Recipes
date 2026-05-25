@@ -10,9 +10,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'Firebase options have not been configured for web in this project.',
-      );
+      return web;
     }
 
     switch (defaultTargetPlatform) {
@@ -30,7 +28,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // Values sourced from android/app/google-services.json.
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCDHczC6Jb3uzuuQmIeaIuUU1UtGe79ClM',
     appId: '1:320744151591:android:5ef128b141259572ad4c02',
@@ -39,14 +36,31 @@ class DefaultFirebaseOptions {
     storageBucket: 'matcha-recipes.firebasestorage.app',
   );
 
-  // Desktop builds require explicit options; using the same Firebase project.
-  // If you later run `flutterfire configure` with Windows enabled, you can
-  // replace this with the generated Windows app configuration.
+    // Values sourced from android/app/google-services.json.
+
+    // Desktop builds require explicit options; using the same Firebase project.
+    // If you later run `flutterfire configure` with Windows enabled, you can
+
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCDHczC6Jb3uzuuQmIeaIuUU1UtGe79ClM',
-    appId: '1:320744151591:android:5ef128b141259572ad4c02',
+    apiKey: 'AIzaSyDnuPRYw2o4mieSUXhtepOB_XRY-W3eegM',
+    appId: '1:320744151591:web:5c4eb0690b66fb7fad4c02',
     messagingSenderId: '320744151591',
     projectId: 'matcha-recipes',
+    authDomain: 'matcha-recipes.firebaseapp.com',
     storageBucket: 'matcha-recipes.firebasestorage.app',
+    measurementId: 'G-G48M0HCH2R',
   );
+
+    // replace this with the generated Windows app configuration.
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDnuPRYw2o4mieSUXhtepOB_XRY-W3eegM',
+    appId: '1:320744151591:web:1e9f5fb3698b821ead4c02',
+    messagingSenderId: '320744151591',
+    projectId: 'matcha-recipes',
+    authDomain: 'matcha-recipes.firebaseapp.com',
+    storageBucket: 'matcha-recipes.firebasestorage.app',
+    measurementId: 'G-KTW9LHHQ8X',
+  );
+
 }
