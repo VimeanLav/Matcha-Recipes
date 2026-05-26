@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _authService = AuthService();
   final _userService = SupabaseUserService();
   bool _submitting = false;
+  bool _agree = false;
 
   @override
   void dispose() {
@@ -85,6 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       );
+      widget.onSignIn();
     } on Exception catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,11 +119,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           hintText: 'Confirm Password',
         ),
         const SizedBox(height: 18),
-        const TermsRow(),
+        TermsRow(value: _agree, onChanged: (v) => setState(() => _agree = v)),
         const SizedBox(height: 34),
         PrimaryButton(
           label: _submitting ? 'Creating…' : 'Create account',
-          onPressed: _submitting ? null : _signUp,
+          onPressed: (!_agree || _submitting) ? null : _signUp,
         ),
         const SizedBox(height: 24),
       ],

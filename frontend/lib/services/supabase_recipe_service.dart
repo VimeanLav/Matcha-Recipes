@@ -39,11 +39,18 @@ class SupabaseRecipeService {
     required String id,
     required Map<String, dynamic> updates,
   }) async {
-    await _supabase.from('recipes').update(updates).eq('id', id);
+    final res = await _supabase.from('recipes').update(updates).eq('id', id).select();
+    // If no rows returned, likely permission denied or missing id.
+    if (res == null || (res is List && res.isEmpty)) {
+      throw Exception('Update failed: no rows returned. Check permissions or id.');
+    }
   }
 
   Future<void> deleteRecipe(String id) async {
-    await _supabase.from('recipes').delete().eq('id', id);
+    final res = await _supabase.from('recipes').delete().eq('id', id).select();
+    if (res == null || (res is List && res.isEmpty)) {
+      throw Exception('Delete failed: no rows deleted. Check permissions or id.');
+    }
   }
 
   Future<List<RecipeModel>> fetchRecipesByIds(List<String> ids) async {

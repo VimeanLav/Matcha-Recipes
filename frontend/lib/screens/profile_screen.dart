@@ -66,10 +66,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return months[month - 1];
   }
 
-  void _openRecipeDetail(RecipeModel recipe) {
-    Navigator.of(context).push(
+  Future<void> _openRecipeDetail(RecipeModel recipe) async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (context) => RecipeDetailScreen(recipe: recipe)),
     );
+    if (!mounted) return;
+    if (result == true) setState(() {});
   }
 
   @override

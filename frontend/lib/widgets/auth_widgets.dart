@@ -200,18 +200,34 @@ class PrimaryButton extends StatelessWidget {
 }
 
 class TermsRow extends StatelessWidget {
-  const TermsRow({super.key});
+  const TermsRow({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
-        Icon(Icons.check_circle_outline, color: Color(0xFF6C8A56), size: 24),
-        SizedBox(width: 10),
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: Checkbox(
+            value: value,
+            onChanged: (v) => onChanged(v ?? false),
+            shape: const CircleBorder(),
+            activeColor: const Color(0xFF6C8A56),
+          ),
+        ),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             'I agree to term and Privacy Policy.',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 17,
               color: Color(0xFF63705D),
               height: 1.35,
@@ -223,7 +239,7 @@ class TermsRow extends StatelessWidget {
   }
 }
 
-class AuthFooter extends StatelessWidget {
+class AuthFooter extends StatefulWidget {
   const AuthFooter({
     super.key,
     required this.leading,
@@ -236,28 +252,41 @@ class AuthFooter extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<AuthFooter> createState() => _AuthFooterState();
+}
+
+class _AuthFooterState extends State<AuthFooter> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Center(
-        child: GestureDetector(
-          onTap: onTap,
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                fontSize: 18,
-                color: Color(0xFF8591A0),
-              ),
-              children: [
-                TextSpan(text: '$leading '),
-                TextSpan(
-                  text: action,
-                  style: const TextStyle(
-                    color: Color(0xFF3E5A34),
-                    fontWeight: FontWeight.w700,
-                  ),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF8591A0),
                 ),
-              ],
+                children: [
+                  TextSpan(text: '${widget.leading} '),
+                  TextSpan(
+                    text: widget.action,
+                    style: TextStyle(
+                      color: const Color(0xFF3E5A34),
+                      fontWeight: FontWeight.w700,
+                      decoration: _hover ? TextDecoration.underline : TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

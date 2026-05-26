@@ -98,9 +98,17 @@ class RecipeDetailScreen extends StatelessWidget {
 														},
 													);
 													if (confirm != true) return;
-													await recipeService.deleteRecipe(recipe.id);
-													if (context.mounted) {
-														Navigator.of(context).pop(true);
+													try {
+														await recipeService.deleteRecipe(recipe.id);
+														if (context.mounted) {
+															Navigator.of(context).pop(true);
+														}
+													} catch (e) {
+														if (context.mounted) {
+															ScaffoldMessenger.of(context).showSnackBar(
+															SnackBar(content: Text('Delete failed: ${e.toString()}')),
+														);
+														}
 													}
 												},
 											)

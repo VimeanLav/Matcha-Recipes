@@ -114,10 +114,13 @@ class _HomeTabState extends State<_HomeTab> {
     super.dispose();
   }
 
-  void _openRecipeDetail(RecipeModel recipe) {
-    Navigator.of(context).push(
+  Future<void> _openRecipeDetail(RecipeModel recipe) async {
+    final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (context) => RecipeDetailScreen(recipe: recipe)),
     );
+    // If recipe was edited or deleted, rebuild so streams refresh / UI updates.
+    if (!mounted) return;
+    if (result == true) setState(() {});
   }
 
   Future<void> _toggleFavorite({
