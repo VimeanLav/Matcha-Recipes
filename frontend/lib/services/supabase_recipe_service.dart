@@ -34,4 +34,24 @@ class SupabaseRecipeService {
   Future<void> createRecipe(RecipeModel recipe) async {
     await _supabase.from('recipes').insert(recipe.toSupabaseMap());
   }
+
+  Future<void> updateRecipe({
+    required String id,
+    required Map<String, dynamic> updates,
+  }) async {
+    await _supabase.from('recipes').update(updates).eq('id', id);
+  }
+
+  Future<void> deleteRecipe(String id) async {
+    await _supabase.from('recipes').delete().eq('id', id);
+  }
+
+  Future<List<RecipeModel>> fetchRecipesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    final rows = await _supabase
+        .from('recipes')
+        .select()
+        .inFilter('id', ids);
+    return rows.map((row) => RecipeModel.fromMap(row)).toList(growable: false);
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../widgets/auth_widgets.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
 	const LoginScreen({super.key, required this.onCreateAccount});
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 	final _passwordController = TextEditingController();
 	final _authService = AuthService();
 	bool _submitting = false;
+	bool _forgotHover = false;
 
 	@override
 	void dispose() {
@@ -67,6 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
 		}
 	}
 
+	Future<void> _forgotPassword() async {
+		final existing = _emailController.text.trim();
+		await Navigator.of(context).push(MaterialPageRoute(
+	 		builder: (_) => ForgotPasswordScreen(initialEmail: existing),
+	 	));
+	}
+
 	@override
 	Widget build(BuildContext context) {
 		return AuthScaffold(
@@ -82,14 +91,23 @@ class _LoginScreenState extends State<LoginScreen> {
 				const SizedBox(height: 22),
 				PasswordField(controller: _passwordController),
 				const SizedBox(height: 8),
-				const Align(
+				Align(
 					alignment: Alignment.centerRight,
-					child: Text(
-						'Forgot?',
-						style: TextStyle(
-							color: Color(0xFF75835F),
-							fontSize: 18,
-							fontWeight: FontWeight.w400,
+					child: MouseRegion(
+						onEnter: (_) => setState(() => _forgotHover = true),
+						onExit: (_) => setState(() => _forgotHover = false),
+						cursor: SystemMouseCursors.click,
+						child: GestureDetector(
+							onTap: _forgotPassword,
+							child: Text(
+								'Forgot?',
+								style: TextStyle(
+									color: const Color(0xFF75835F),
+									fontSize: 18,
+									fontWeight: FontWeight.w400,
+									decoration: _forgotHover ? TextDecoration.underline : TextDecoration.none,
+								),
+							),
 						),
 					),
 				),

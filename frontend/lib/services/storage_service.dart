@@ -9,6 +9,7 @@ class StorageService {
   final SupabaseClient _supabase;
 
   static const String _supabaseBucket = 'recipes';
+  static const String _avatarsBucket = 'avatars';
 
   String _extensionForContentType(String contentType) {
     final ct = contentType.toLowerCase();
@@ -48,5 +49,29 @@ class StorageService {
         .getPublicUrl(path);
 
     return imageUrl;
+  }
+
+  Future<String> uploadProfileAvatar({
+    required String uid,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final ext = _extensionForContentType(contentType);
+    final filename = '$timestamp.$ext';
+    final path = '$uid/$filename';
+
+    await _supabase.storage
+        .from(_avatarsBucket)
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: contentType,
+            upsert: true,
+          ),
+        );
+
+    return _supabase.storage.from(_avatarsBucket).getPublicUrl(path);
   }
 }

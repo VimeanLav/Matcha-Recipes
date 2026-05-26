@@ -3,10 +3,18 @@ import 'package:flutter/material.dart';
 import '../models/recipe_model.dart';
 
 class RecipeCard extends StatelessWidget {
-  const RecipeCard({super.key, required this.recipe, this.onTap});
+  const RecipeCard({
+    super.key,
+    required this.recipe,
+    this.onTap,
+    this.isFavorite = false,
+    this.onFavoriteTap,
+  });
 
   final RecipeModel recipe;
   final VoidCallback? onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -53,16 +61,22 @@ class RecipeCard extends StatelessWidget {
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        shape: BoxShape.circle,
-                      ),
-                      padding: const EdgeInsets.all(6),
-                      child: Icon(
-                        Icons.favorite_border,
-                        size: 18,
-                        color: colorScheme.onSurfaceVariant,
+                    child: InkWell(
+                      onTap: onFavoriteTap,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          size: 18,
+                          color: isFavorite
+                              ? const Color(0xFF557A45)
+                              : colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),

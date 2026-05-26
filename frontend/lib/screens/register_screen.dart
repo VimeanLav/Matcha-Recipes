@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import '../services/supabase_user_service.dart';
 import '../widgets/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
 
   final _authService = AuthService();
+  final _userService = SupabaseUserService();
   bool _submitting = false;
 
   @override
@@ -65,6 +67,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final user = credential.user;
       if (user != null) {
         await user.updateDisplayName(username);
+        await _userService.upsertProfile(
+          id: user.uid,
+          username: username,
+          bio: '',
+          avatarUrl: '',
+        );
       }
 
       await _authService.signOut();

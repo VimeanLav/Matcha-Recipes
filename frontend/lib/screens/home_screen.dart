@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/recipe_model.dart';
 import '../services/auth_service.dart';
+import '../services/supabase_favorite_service.dart';
 import '../services/supabase_recipe_service.dart';
 import '../widgets/recipe_card.dart';
 import 'add_recipe_screen.dart';
+import 'favorite_screen.dart';
+import 'notifications_screen.dart';
 import 'profile_screen.dart';
 import 'recipe_detail_screen.dart';
 
@@ -47,10 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = <Widget>[
       const _HomeTab(),
-      const _PlaceholderTab(label: 'Saved'),
+      const FavoriteScreen(),
       const SizedBox.shrink(),
-      const _PlaceholderTab(label: 'Notifications'),
-      ProfileScreen(),
+      NotificationsScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -100,6 +104,7 @@ class _HomeTab extends StatefulWidget {
 class _HomeTabState extends State<_HomeTab> {
   final _authService = AuthService();
   final _recipeService = SupabaseRecipeService();
+  final _favoriteService = SupabaseFavoriteService();
   final _searchController = TextEditingController();
   String _categoryFilter = 'All';
 
@@ -115,15 +120,36 @@ class _HomeTabState extends State<_HomeTab> {
     );
   }
 
-  String _greetingText(String? email) {
-    if (email == null || email.isEmpty) {
-      return 'Good morning';
+  Future<void> _toggleFavorite({
+    required RecipeModel recipe,
+    required String userId,
+    required bool isFavorite,
+  }) async {
+    if (isFavorite) {
+      await _favoriteService.removeFavorite(
+        userId: userId,
+        recipeId: recipe.id,
+      );
+    } else {
+      await _favoriteService.addFavorite(
+        userId: userId,
+        recipeId: recipe.id,
+      );
     }
-    final namePart = email.split('@').first.trim();
-    if (namePart.isEmpty) {
-      return 'Good morning';
+  }
+
+  String _greetingText(User? user) {
+    if (user == null) return 'Good morning';
+    final displayName = (user.displayName ?? '').trim();
+    if (displayName.isNotEmpty) {
+      return 'Good morning, $displayName';
     }
-    return 'Good morning, $namePart';
+    final email = (user.email ?? '').trim();
+    final namePart = email.isEmpty ? '' : email.split('@').first.trim();
+    if (namePart.isNotEmpty) {
+      return 'Good morning, $namePart';
+    }
+    return 'Good morning';
   }
 
   @override
@@ -139,7 +165,7 @@ class _HomeTabState extends State<_HomeTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _greetingText(user?.email),
+              _greetingText(user),
               style: theme.textTheme.titleMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -239,56 +265,89 @@ class _HomeTabState extends State<_HomeTab> {
                       ? filtered.sublist(1)
                       : const <RecipeModel>[];
 
-                  return ListView(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  return StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: user == null
+                        ? null
+                        : _favoriteService.streamFavorites(user.uid),
+                    builder: (context, favoriteSnapshot) {
+                      final favorites = favoriteSnapshot.data ??
+                          const <Map<String, dynamic>>[];
+                      final favoriteIds = favorites
+                          .map((row) => (row['recipe_id'] ?? '').toString())
+                          .where((id) => id.isNotEmpty)
+                          .toSet();
+
+                      return ListView(
                         children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Featured today',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {},
+                                child: const Text('See all'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _FeaturedCard(
+                            recipe: featured,
+                            onTap: () => _openRecipeDetail(featured),
+                            isFavorite: favoriteIds.contains(featured.id),
+                            onFavoriteTap: user == null
+                                ? null
+                                : () => _toggleFavorite(
+                                      recipe: featured,
+                                      userId: user.uid,
+                                      isFavorite:
+                                          favoriteIds.contains(featured.id),
+                                    ),
+                          ),
+                          const SizedBox(height: 18),
                           Text(
-                            'Featured today',
+                            'Popular Now',
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text('See all'),
+                          const SizedBox(height: 12),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 14,
+                                  crossAxisSpacing: 14,
+                                  childAspectRatio: 1.05,
+                                ),
+                            itemCount: popular.length,
+                            itemBuilder: (context, index) {
+                              final recipe = popular[index];
+                              final isFavorite = favoriteIds.contains(recipe.id);
+                              return RecipeCard(
+                                recipe: recipe,
+                                onTap: () => _openRecipeDetail(recipe),
+                                isFavorite: isFavorite,
+                                onFavoriteTap: user == null
+                                    ? null
+                                    : () => _toggleFavorite(
+                                          recipe: recipe,
+                                          userId: user.uid,
+                                          isFavorite: isFavorite,
+                                        ),
+                              );
+                            },
                           ),
+                          const SizedBox(height: 18),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      _FeaturedCard(
-                        recipe: featured,
-                        onTap: () => _openRecipeDetail(featured),
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        'Popular Now',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 14,
-                              crossAxisSpacing: 14,
-                              childAspectRatio: 1.05,
-                            ),
-                        itemCount: popular.length,
-                        itemBuilder: (context, index) {
-                          return RecipeCard(
-                            recipe: popular[index],
-                            onTap: () => _openRecipeDetail(popular[index]),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 18),
-                    ],
+                      );
+                    },
                   );
                 },
               ),
@@ -338,10 +397,17 @@ class _FilterPill extends StatelessWidget {
 }
 
 class _FeaturedCard extends StatelessWidget {
-  const _FeaturedCard({required this.recipe, this.onTap});
+  const _FeaturedCard({
+    required this.recipe,
+    this.onTap,
+    this.isFavorite = false,
+    this.onFavoriteTap,
+  });
 
   final RecipeModel recipe;
   final VoidCallback? onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -394,51 +460,77 @@ class _FeaturedCard extends StatelessWidget {
                 left: 16,
                 right: 16,
                 bottom: 14,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Text(
-                        recipeCategoryToString(recipe.category).toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      recipe.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.schedule,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${recipe.timeMinutes} min',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface.withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Text(
+                              recipeCategoryToString(recipe.category)
+                                  .toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
+                          const SizedBox(height: 10),
+                          Text(
+                            recipe.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.schedule,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${recipe.timeMinutes} min',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: onFavoriteTap,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface.withValues(alpha: 0.9),
+                          shape: BoxShape.circle,
                         ),
-                      ],
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite
+                              ? const Color(0xFF557A45)
+                              : colorScheme.onSurface,
+                        ),
+                      ),
                     ),
                   ],
                 ),
