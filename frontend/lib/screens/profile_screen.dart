@@ -251,19 +251,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       }
 
-                      return GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 0.9,
-                        ),
-                        itemCount: recipes.length,
-                        itemBuilder: (context, index) {
-                          return RecipeCard(
-                            recipe: recipes[index],
-                            onTap: () => _openRecipeDetail(recipes[index]),
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final width = constraints.maxWidth;
+                          final crossAxisCount = width >= 1100
+                              ? 4
+                              : width >= 700
+                                  ? 3
+                                  : 2;
+                          return GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                              childAspectRatio: width >= 700 ? 0.82 : 0.9,
+                            ),
+                            itemCount: recipes.length,
+                            itemBuilder: (context, index) {
+                              return RecipeCard(
+                                recipe: recipes[index],
+                                onTap: () => _openRecipeDetail(recipes[index]),
+                              );
+                            },
                           );
                         },
                       );

@@ -22,28 +22,35 @@ class AuthScaffold extends StatelessWidget {
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 18, 24, 24),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 42),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const BrandMark(),
-                      const SizedBox(height: 28),
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.displaySmall,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 42,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const BrandMark(),
+                          const SizedBox(height: 28),
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.displaySmall,
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            subtitle,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                          const SizedBox(height: 42),
+                          ...children,
+                          const Spacer(),
+                          footer,
+                        ],
                       ),
-                      const SizedBox(height: 14),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(height: 42),
-                      ...children,
-                      const Spacer(),
-                      footer,
-                    ],
+                    ),
                   ),
                 ),
               ),

@@ -319,31 +319,41 @@ class _HomeTabState extends State<_HomeTab> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final width = constraints.maxWidth;
+                              final crossAxisCount = width >= 1200
+                                  ? 4
+                                  : width >= 900
+                                      ? 3
+                                      : 2;
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
                                   mainAxisSpacing: 14,
                                   crossAxisSpacing: 14,
-                                  childAspectRatio: 1.05,
+                                  childAspectRatio: width >= 900 ? 1.0 : 1.05,
                                 ),
-                            itemCount: popular.length,
-                            itemBuilder: (context, index) {
-                              final recipe = popular[index];
-                              final isFavorite = favoriteIds.contains(recipe.id);
-                              return RecipeCard(
-                                recipe: recipe,
-                                onTap: () => _openRecipeDetail(recipe),
-                                isFavorite: isFavorite,
-                                onFavoriteTap: user == null
-                                    ? null
-                                    : () => _toggleFavorite(
-                                          recipe: recipe,
-                                          userId: user.uid,
-                                          isFavorite: isFavorite,
-                                        ),
+                                itemCount: popular.length,
+                                itemBuilder: (context, index) {
+                                  final recipe = popular[index];
+                                  final isFavorite = favoriteIds.contains(recipe.id);
+                                  return RecipeCard(
+                                    recipe: recipe,
+                                    onTap: () => _openRecipeDetail(recipe),
+                                    isFavorite: isFavorite,
+                                    onFavoriteTap: user == null
+                                        ? null
+                                        : () => _toggleFavorite(
+                                              recipe: recipe,
+                                              userId: user.uid,
+                                              isFavorite: isFavorite,
+                                            ),
+                                  );
+                                },
                               );
                             },
                           ),
