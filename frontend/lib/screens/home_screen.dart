@@ -57,6 +57,57 @@ class _HomeScreenState extends State<HomeScreen> {
       const ProfileScreen(),
     ];
 
+    final isWide = MediaQuery.of(context).size.width >= 800;
+
+    if (isWide) {
+      return Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: _tabIndex,
+              onDestinationSelected: (index) {
+                if (index == 2) {
+                  _openAddRecipe();
+                  return;
+                }
+                setState(() => _tabIndex = index);
+              },
+              labelType: NavigationRailLabelType.all,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite_border),
+                  selectedIcon: Icon(Icons.favorite),
+                  label: Text('Saved'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.add_circle_outline),
+                  selectedIcon: Icon(Icons.add_circle),
+                  label: Text('Add'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.notifications_none),
+                  selectedIcon: Icon(Icons.notifications),
+                  label: Text('Notification'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: Text('Profile'),
+                ),
+              ],
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(child: IndexedStack(index: _tabIndex, children: pages)),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       body: IndexedStack(index: _tabIndex, children: pages),
       bottomNavigationBar: NavigationBar(
@@ -81,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.notifications_none),
             selectedIcon: Icon(Icons.notifications),
-            label: 'Notifications',
+            label: 'Notification',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -291,10 +342,7 @@ class _HomeTabState extends State<_HomeTab> {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text('See all'),
-                              ),
+                              const SizedBox.shrink(),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -432,123 +480,124 @@ class _FeaturedCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
-        child: Container(
-          height: 180,
-          color: colorScheme.surfaceContainerHighest,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: recipe.imageUrl.isEmpty
-                    ? Container(color: colorScheme.surfaceContainerHigh)
-                    : Image.network(
-                        recipe.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: colorScheme.surfaceContainerHigh,
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.image_outlined,
-                              color: colorScheme.outline,
-                            ),
-                          );
-                        },
-                      ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        colorScheme.scrim.withValues(alpha: 0.65),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Container(
+            color: colorScheme.surfaceContainerHighest,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: recipe.imageUrl.isEmpty
+                      ? Container(color: colorScheme.surfaceContainerHigh)
+                      : Image.network(
+                          recipe.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: colorScheme.surfaceContainerHigh,
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.image_outlined,
+                                color: colorScheme.outline,
+                              ),
+                            );
+                          },
+                        ),
                 ),
-              ),
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: 14,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surface.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Text(
-                              recipeCategoryToString(recipe.category)
-                                  .toUpperCase(),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            recipe.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.schedule,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${recipe.timeMinutes} min',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          colorScheme.scrim.withValues(alpha: 0.65),
+                          Colors.transparent,
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      onTap: onFavoriteTap,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface.withValues(alpha: 0.9),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite
-                              ? const Color(0xFF557A45)
-                              : colorScheme.onSurface,
+                  ),
+                ),
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 14,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface.withValues(alpha: 0.85),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Text(
+                                recipeCategoryToString(recipe.category).toUpperCase(),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              recipe.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.schedule,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${recipe.timeMinutes} min',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      InkWell(
+                        onTap: onFavoriteTap,
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite
+                                ? const Color(0xFF557A45)
+                                : colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
